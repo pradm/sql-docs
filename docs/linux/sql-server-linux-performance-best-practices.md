@@ -92,6 +92,24 @@ The default setting of **vm.max_map_count** (which is 65536) may not be high eno
 sysctl -w vm.max_map_count=262144
 ```
 
+SQL Server on Linux is not yet compatible with legacy_va_layout, you can find more details about the same in this KB Article https://support.microsoft.com/en-us/help/4134638/sql-server-2017-terminates-and-generates-a-core-dump-on-rhel-7-4-when .
+
+The O/S could switch its behavior to legacy VA layout for either of the following reasons.
+     •	The soft stack limit value is set to Unlimited (for example, a modified limits.conf script or an ulimit -sS setting).
+     •	A global legacy VA layout is enabled (for example, sysctl vm.legacy_va_layout or modify /etc/sysctl.conf).
+
+We recommend to make sure vm.legacy_va_layout is set to 0 and the soft stack limit is set to 8192 on Linux machines which will host SQL Server process.
+
+   In the /etc/security/limit.conf layout, add a new row, and then enter the following code: 
+      mssql soft stack 8192
+      root soft stack 8192
+
+   In the /etc/sysctl.conf layout, add a new row, and then enter the following code: 
+      vm.legacy_va_layout = 0
+
+   Restart the computer: 
+      reboot
+
 ### Disable last accessed date/time on file systems for SQL Server data and log files
 
 Use the **noatime** attribute with any file system that is used to store SQL Server data and log files. Refer to your Linux documentation on how to set this attribute.
